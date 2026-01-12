@@ -4,8 +4,9 @@
 ### 🎯 프로젝트 목적
 - 자바 기초 문법과 객체지향 원리를 학습하기 위한 저장소입니다.
 
-
-### 🛠 사용 기술 (Tech Stack)
+### 참고 강의
+ - 인프런 김영한 자바 기초 
+### 🛠 사용 기술 
 - Java 21
 - IntelliJ IDEA
 - Git/GitHub
@@ -17,3 +18,4 @@
  - oop = 객체 지향 프로그래맹
  - construct = 생성자
  - com.helloshop, pack = 패키지 
+ - access = 접근자
