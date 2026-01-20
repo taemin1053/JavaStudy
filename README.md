@@ -19,3 +19,4 @@
  - construct = 생성자
  - com.helloshop, pack = 패키지 
  - access = 접근자
+ - static1,static2 = 자바 구조, 정적변수
