@@ -1,4 +1,4 @@
-package test;
+package codingTest.stackQueue;
 import java.util.*;
 public class testbridge {
     public int solutionBridge(int bridge_length, int weight, int[] truck_weight){

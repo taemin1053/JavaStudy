@@ -1,4 +1,4 @@
-package test;
+package codingTest;
 
 import java.util.ArrayList;// 1. 요금 싼 순서대로 나오는 우선순위 큐를 만든다.
 import java.util.Arrays;

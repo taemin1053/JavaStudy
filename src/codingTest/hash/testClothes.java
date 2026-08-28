@@ -1,4 +1,4 @@
-package test;
+package codingTest.hash;
 
 import java.util.HashMap;
 

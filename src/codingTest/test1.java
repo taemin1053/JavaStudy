@@ -1,4 +1,4 @@
-package test;
+package codingTest;
 
 import java.util.*;
 

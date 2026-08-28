@@ -1,4 +1,4 @@
-package test;
+package codingTest.stackQueue;
 
 import java.util.HashMap;
 

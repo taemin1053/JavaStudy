@@ -1,4 +1,4 @@
-package test;
+package codingTest.heap;
 
 import java.util.Arrays;
 import java.util.PriorityQueue;
