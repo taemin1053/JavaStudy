@@ -1,4 +1,5 @@
 package codingTest.exhaustiveSearch;
+import java.util.*;
 /*
 한자리 숫자가 적힌 종이 조각이 흩어져있습니다. 흩어진 종이 조각을 붙여 소수를 몇 개 만들 수 있는지 알아내려 합니다.
 
@@ -64,10 +65,147 @@ public NumberGenerator처럼 생성자를 통해 강제로 주입받아야함
 
 이 문제에서는 에라토스테네스의 체가 좋아 보임-> 문자열에서 가장 큰수까지 에라토스테네스의 체를 돌리고 문자열로 만들수 있는 수가 거기에 있는지만 비교하면 되지 않을까..?
 제곱근이 조금 더 괜찮을지도.. 만든 즉시 확인 시키면 되니깐..
+
+3 피드백
+마지막에 말한 제곱근-> 이것이 정확한 정답이다
+에라토스테네스의 체를 쓰면 공간 복잡도 최적화 실패이다
+-> 1.치명적인 메모리 낭비(공간 복잡도)
+->numbers가  9999999로 주어졌다고 가정하면, 에라토스테네스의 체를 쓰려면 가장 큰수인 9,999,999까지 담을 수 있는 1천만 칸짜리 boolean 배열을 메모리에 올려야함
+우리가 종이 조각으로 만들 수 있는 숫자는 기껏해야 몇백 ~몇천개 수준인데 이를 확인하기 위해 천만 개의 소수여부를 전부 계산하고 메모리에 들고 있는것은 낭비이다
+->2. 불필요한 연산(시간 복잡도)
+종이 조각 7개로 만들 수 있는 숫자의 모들 조합은 최대 7!에서 자릿수별 조합을 다 합쳐도 몇만 개 채 되지 않는다,
+ 천만 번 루프를 도는 체를 만드는 것보다 조합으로 만들어낸 그 몇만 개의 숫자들만 그때그때 O(√N)로직에 던져서 판별하는 것이 압도적으로 빠르고 효율
+
+ 피드백을 통한 논리 설계 확인하기
+ Set<Integer> ? 뭔지 모름 -> 찾아보니 Set<>은  중복을 허용 안하면, 순서 유지가 안되며 , 배열처럼 인덱스를 통한 접근이 불가능하다. , 어디서 공부할 때 들어본 익숙한 느낌 HashSet이였다.
+ HashSet은 중복은 허용되지 않으며, Hash의 특성을 가지고 있는 것이다. hashSet 밖에도 LinkedHashSet, TreeSet이 있다. 여기서는 key:value 필요없고, 링크드 리스트로 순선를 찾을 필요도 없다.
+ 따라서 TreeSet을 써야할 것 같다. 하지만 TreeSet도 의문이다, 정렬된 데이터가 필요하지않다. 사실 hashSet으로 그냥 써도 되지않을까 싶다. key value가 아닌 value만 사용해서
+ 피드백을 받았을 때 generatorNumber(숫자 생성기), primeValidator(소수 판별기) 이렇게 두개 클래스를 만들어 내는 것이 가장 좋아 보인다.
+ 그러면 숫자 생성기를 어떤 식으로 만들 것이냐인데 찾아본 결과 조합 재귀 알고리즘이 있다 .
+ 조합 재귀 알고리즘이란?
+ 정의: 서로 다른 n개 중에서 순서 없이 r개를 고르는  모든 경우의 수를 재귀 호출을 통해 구하는 방법
+ 핵심 원리: 조합은 파스칼의 상각형 공식 성질을 이용하거나 DFS(백트래킹) 방식을 통해 현재 원소를 선택하는 경우와 선택하지 않는 경우로 나누어 구현
+ 종료 조건 : 뽑아야하는 개수가 되거나 인덱스가 배열의 끝에 도달했을 때 결과를 저장하고 리턴
+ 재귀 호출: 현재 원소를 포함하여 재귀를 돌거 r-1, 현재 원소를 포함하지 않고 다음 원소로 재귀를 돈다.
+
+ 우리가 여기서 조합 재귀 알고리즘으로 쓸 수 있는거, 백트래킹 방식으로 현재 원소를 선택하지않는 것으로 점점 선택하는 숫자를 제거하는 방식으로 가는 것 이 좋아보인다 Set으로 중복을 제거하고
+ PrimeValidator클래스로 넘겨주는 것이다 이 과정이 한번에 되게 solution 함수에서 설계
+
+피드백...
+ 조합 백트래킹을 상용할 경우, 조합은 중복이 되어도 상관을 안쓴다. 예를 들어 1,7을 뽑을 때 1,7와 7,1을 같은걸로 취급한다. 즉 1과 7을 뽑았다는 결과만 중요하게 생각한다
+ 따라서 조합과 비교되는 순열을 해야한다. 종이 조각 1과 7을 뽑았을때 17과 71은 전혀다른 숫자이기에 소수 판별에 결과에도 완전히 달라진다.
+ 이 문제는 종이 족각의 배치 순서에 따라 다른 숫자가 만들어지므로 조합이 아니라 순열 백트래킹을 사용해야함
+
+순열 설명
+순열은 n개의 값 중에서 r개의 숫자를 모든 순선대로 뽑는 경우를 말한다.
+예를 들어 1,2,3이라는 3개의 배열에서 2개의 숫자를 뽑는 경우 -> 1,2 , 1,3 , 2,1 , 2,3 , 3,1 , 3,2 이렇게 6개가 된다.
+
+1. Swap을 이용한 순열
+첫번째는 swap 함수를 만들어서 배열들의 값을 직접 바꾸는 방법
+배열의 첫 값부터 순서대로 하나씩 바꾸며 모든 값을 한번씩 swap
+depth 를 기준 인덱스로 하여 depth보다 인덱스가 작은 값들은 그대로 고정하고, depth보다 인덱스가 큰 값들만 가지고 다시 swap을 진행한다.
+depth보다 인덱스가 큰 값들만 가지고 다시 swap을 진행순
+-> 쉽게 생각하면 자리를 고정해두고 나머지 값들끼리만 자리를 바꾼다.
+2.Visited 배열을 이용한한 순열
+swap과 달리 사전식으로 순열을 구현 할 수 있다.
+ arr: r개를 뽑기위한 n개의 값
+ output: 뽑힌 r개의 값
+ visited : 중복해서 뽑지 않기 위해 체크하는 값
+
+ DFS를 돌면서 모든 인덱스를 방문하여 output 에 값을 넣는다
+ 이미 들어간 값은 visited 값을 true로 바꾸어 중복하여 넣지 않도록한다.
+ depth 값은 output에 들어간 숫자의 길이라고 생각
+ depth의 값이 r만큼 되면 output에 있는 값을 출력
+ 그러면 이 문제를 풀기 위해서는 순열 visited 방식을 사용해서 중복을 넣지 않게 해야한다 .
+boolean[] visited와 문자열을 정수열로 바꾸는 Integer.parseInt() 변환 후 hashSet에 넣기
+
  */
+
+class numberGenerator {
+    private final String numbers; //원본 종이 조각 문자열
+    private  final boolean[] visited; //어떤 위치에 종이 조각이 사용했는지 기억할 방분 체크 배열
+    private  final Set<Integer> NumberGenerator; //중복없이 완성된 숫자를 담는 배열
+
+    //생성자 생성
+    public numberGenerator(String numbers){
+        this.NumberGenerator = new HashSet<>();
+        this.numbers = numbers;
+        this.visited = new boolean[numbers.length()];
+    }
+
+    public Set<Integer> generate(){
+        //외부에서 숫자 생성기 기계의 버튼을 누르는 역할입니다. 내부적으로 빈 문자열 ""을 시작으로 재귀 함수를 호출하고, 최종 완성된 Set을 반환합니다.
+        dfs("");
+        return NumberGenerator;
+    }
+    private void dfs(String currentNumber){
+        //실제 순열(백트래킹) 로직이 돌아가는 핵심 재귀 메서드입니다. 외부로 노출할 필요가 없으므로 private으로 닫아둡니다.
+        //1(저장). 현재까지 만들어진 currentNumber(조각)가 빈 문자열("")이 아니라면 정수로 변환하여 set에 저장
+        if(!currentNumber.isEmpty()){
+            NumberGenerator.add(Integer.parseInt(currentNumber));
+        }
+        //2(순회). 원본 numbers의 길이 만큼 for문을 돌며 종이 조각을 하나 씩 확인
+        for(int i =0; i<numbers.length(); i ++ ){
+            //3조건. 만약 visited[i]가 false라면?, 즉 i번째 종이 조각(숫자)를 안썼다면?
+            if(!visited[i]){
+                //4. true로 바꾸고 dfs(현재 숫자+ 아직 안쓴 숫자 붙여서 재귀함수 호출), 그후 다른 조합을 위해 다시 false로 변경
+                visited[i] = true;
+                dfs(currentNumber + numbers.charAt(i));
+                visited[i] = false;
+            }
+        }
+
+    }
+}
+class PrimeValidator{
+    /*
+    private final List<numberGenerator> number;
+
+    public PrimeValidator(List<numberGenerator> number){
+        this.number =number;
+    }
+    싹다 받아와서 할려고 했는데 클래스는 하나에 역할을 할 때 가장 이쁠 거 같음..
+     */
+    public boolean isPrime(int number){
+        //예외처리 0이거나 1이면 소수가 아니므로 F
+        if(number == 0 || number == 1){
+            return false;
+        }
+        //제곱근의 원칙 i가 제곱근까지 반복문을 돌린다
+        for(int i = 2; i <= Math.sqrt(number); i ++ ){
+            //만약 number가 i로 나누어 떨어지면 그건 소수가 아님
+            if(number % i ==0){
+                    return  false;
+            }
+        }
+        return true;
+    }
+
+
+
+}
 public class testFindPrimenumber {
+    //자 그러면 이제 solution에서 위에 있는 클래스를 써서 해야겠지?
     public int solution(String numbers) {
-        int answer = 0;
-        return answer;
+        int count = 0;
+        //일단 객체 생성
+        PrimeValidator prime = new PrimeValidator();
+        numberGenerator ng = new numberGenerator(numbers);
+        Set<Integer> generatedNumbers = ng.generate();
+        for(Integer number: generatedNumbers){
+
+            if(prime.isPrime(number)){
+                count ++ ;
+            }
+
+        }
+
+        return  count;
+    }
+
+    public static void main(String[] args) {
+        String num = "17";
+        testFindPrimenumber fp = new testFindPrimenumber();
+       System.out.println(fp.solution(num));
     }
 }
