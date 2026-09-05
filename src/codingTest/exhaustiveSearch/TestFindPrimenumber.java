@@ -184,7 +184,7 @@ class PrimeValidator{
 
 
 }
-public class testFindPrimenumber {
+public class TestFindPrimenumber {
     //자 그러면 이제 solution에서 위에 있는 클래스를 써서 해야겠지?
     public int solution(String numbers) {
         int count = 0;
@@ -205,7 +205,7 @@ public class testFindPrimenumber {
 
     public static void main(String[] args) {
         String num = "17";
-        testFindPrimenumber fp = new testFindPrimenumber();
+        TestFindPrimenumber fp = new TestFindPrimenumber();
        System.out.println(fp.solution(num));
     }
 }
